@@ -1,42 +1,44 @@
+//users.service.ts
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User, UserRole } from './entities/user.entity';
-import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import { Repository } from 'typeorm'; // Import Repository from TypeORM
+import * as Argon2 from 'argon2';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    public readonly userRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const saltOrRounds = 10;
-    const newUser = this.usersRepository.create({
-      ...createUserDto,
-      password: await bcrypt.hash(createUserDto.password, saltOrRounds),
-    })
-    const insertedUser = await this.usersRepository.save(newUser)
-    delete insertedUser.password
-    return insertedUser
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    
+      const newUser = this.userRepository.create({...createUserDto,
+      password: await this.hashPassword(createUserDto.password)});
+      const inserteddata=  await this.userRepository.save(newUser);
+      return inserteddata;
+    
+  }
+
+
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { email } });
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    return Argon2.hash(password);
+  }
+
+  
+  async getUserInfo(id: string): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { id: id }});
   }
 
   findAll() {
-    return `This action returns all users`;
+    return this.userRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
 }
