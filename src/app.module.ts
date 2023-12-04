@@ -3,7 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
-
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './users/auth/auth.guard';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from './users/auth/constants';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -22,8 +25,14 @@ import { User } from './users/entities/user.entity';
       inject: [ConfigService],
     }),
     UsersModule,
+    JwtModule.register(jwtConstants),
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

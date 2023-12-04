@@ -1,3 +1,4 @@
+//password.interceptors.ts
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,7 +12,7 @@ export class LoggingInterceptor implements NestInterceptor<User, any> {
       .handle()
       .pipe(
         map((u: User) => {
-            delete u.password
+            delete u?.password
             return u
         }),
       );

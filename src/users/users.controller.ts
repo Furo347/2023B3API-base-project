@@ -7,13 +7,14 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
   Request,
   HttpException,
   HttpStatus,
   NotFoundException,
   UsePipes,
   ValidationPipe,
-  UseInterceptors,
+  UseInterceptors, createParamDecorator, ExecutionContext
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -22,7 +23,7 @@ import { User } from './entities/user.entity';
 import { AuthService } from './auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { LoggingInterceptor } from './interceptors/password.interceptors';
-
+import { AuthGuard, Public} from './auth/auth.guard';
 
 @Controller('users')
 @UseInterceptors(LoggingInterceptor)
@@ -33,6 +34,7 @@ export class UsersController {
   ) {}
 
   // Route de connexion des utilisateurs
+  @Public()
   @Post('auth/sign-up')
   @UsePipes(new ValidationPipe())
   async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
@@ -40,27 +42,31 @@ export class UsersController {
   }
   
   //Route de login
+  @Public()
   @Post('auth/login')
   async login(@Body() dto: LoginUserDto): Promise<{ access_token: string }> {
     return this.authservice.signIn(dto)
   }
 
   // Route pour obtenir la liste de tous les utilisateurs
+  
   @Get()
   findAll() {
     return this.usersService.findAll();
   }
 
+  
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.getUserInfo(id);
   }
-  // Route pour obtenir les informations personnelles de l'utilisateur connecté
-  @Get('me')
+  
+  @Get('/me')
   getMyUserInfo(@Request() req) {
     return this.usersService.getUserInfo(req.user);
   }
 
+ 
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     try {
@@ -75,9 +81,6 @@ export class UsersController {
       if (updateUserDto.username) {
         existingUser.username = updateUserDto.username;
       }
-      // Update other properties as needed
-
-      // Update the user in the database using the repository's update method
       await this.usersService.userRepository.update(id, existingUser);
 
       // Fetch the updated user from the database (optional, but recommended)
