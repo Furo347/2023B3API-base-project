@@ -1,5 +1,7 @@
 //user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, Unique } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany } from 'typeorm';
+import { ProjectUserEntity } from '../../project-users/entities/project-users.entity'
+
 export enum UserRole {
   Employee= 'Employee',
   Admin= 'Admin',
@@ -22,4 +24,7 @@ export class User {
  
   @Column({ default: UserRole.Employee })
   role: UserRole
+
+  @OneToMany(() => ProjectUserEntity, projectUser => projectUser.user)
+  projectUsers: ProjectUserEntity[];
 }
