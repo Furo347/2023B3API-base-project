@@ -1,65 +1,73 @@
 //users.controller.ts
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Request,
-  HttpException,
-  HttpStatus,
-  NotFoundException,
-  UsePipes,
   ValidationPipe,
-  ParseUUIDPipe,
-  UseInterceptors, createParamDecorator, ExecutionContext
+  UsePipes,
+  HttpStatus,
+  HttpCode,
+  Get,
+  Req,
+  UseGuards,
+  Param,
+  forwardRef,
+  Inject,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { AuthService } from './auth/auth.service';
-import { LoginUserDto } from './dto/login-user.dto';
-import { Public} from './auth/auth.guard';
-import  {Request as ExpressRequest} from 'express'
+import { loginUserDto } from './dto/login-user.dto';
+import { AuthGuard } from '../auth/guard';
+import { EventsService } from '../events/events.service';
+
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly authservice: AuthService,
+    @Inject(forwardRef(() => EventsService))
+    private readonly eventService: EventsService,
   ) {}
 
-  @Public()
   @Post('auth/sign-up')
   @UsePipes(new ValidationPipe())
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+  create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
 
-  @Public()
+  @HttpCode(HttpStatus.CREATED)
   @Post('auth/login')
-  async login(@Body() dto: LoginUserDto): Promise<{ access_token: string }> {
-    const access_token = await this.authservice.signIn(dto)
-    return { access_token }
+  @UsePipes(new ValidationPipe())
+  signIn(@Body() signIn: loginUserDto) {
+    return this.usersService.signIn(signIn);
   }
-  
+  @UseGuards(AuthGuard)
   @Get()
-  async findAll(): Promise<User[]> {
+  findAll() {
     return this.usersService.findAll();
   }
-
-  @Get('/me')
-  async getMyUserInfo(@Request() req: ExpressRequest): Promise<User> {
-    return req.user as User;
-  }
-  
-  @Get(':id')
-  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<User>{
-    const user= await this.usersService.getUserInfo(id);
-    if(!user) throw new NotFoundException();
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard)
+  @Get('me')
+  returnUser(@Req() req) {
+    const user = this.usersService.returnUser(req.user.sub);
+    if (!user) {
+      return 'Utilisateur non trouvé';
+    }
     return user;
+  }
+  @UseGuards(AuthGuard)
+  @Get(':id')
+  getUserById(@Param('id') userId: string) {
+    const user = this.usersService.returnUser(userId);
+    return user;
+  }
+  @UseGuards(AuthGuard)
+  @Get(':id/meal-vouchers/:month')
+  async getMealVouchersAmount(
+    @Param('id') userId: string,
+    @Param('month') month: number,
+  ) {
+    const amount = await this.eventService.calculateMealVouchers(userId, month);
+    return { ticketRestaurant: amount };
   }
 }

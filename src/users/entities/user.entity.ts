@@ -1,30 +1,39 @@
 //user.entity.ts
-import { Entity, PrimaryGeneratedColumn, Column, Unique, OneToMany } from 'typeorm';
-import { ProjectUserEntity } from '../../project-users/entities/project-users.entity'
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { IsEmail, IsOptional } from 'class-validator';
+import { Exclude } from 'class-transformer';
+import { ProjectUser} from '../../project-users/entities/project-users.entity'
 
 export enum UserRole {
-  Employee= 'Employee',
-  Admin= 'Admin',
-  ProjectManager= 'ProjectManager'
+  Employee = 'Employee',
+  Admin = 'Admin',
+  ProjectManager = 'ProjectManager',
 }
+
 @Entity()
-@Unique(['username','email'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id!: string;
+  id: string;
 
-  @Column({unique: true})
-  username!: string;
+  @Column({ unique: true })
+  username: string;
 
-  @Column({unique :true})
-  email!: string;
+  @Column({ unique: true })
+  @IsEmail({}, { message: "L'adresse e-mail n'est pas valide" })
+  email: string;
 
-  @Column({ select: false })
-  password!: string;
- 
+  @Exclude()
+  @Column({
+    select: false
+  })
+  password: string;
+
   @Column({ default: UserRole.Employee })
-  role: UserRole
+  @IsOptional()
+  role: UserRole;
 
-  @OneToMany(() => ProjectUserEntity, projectUser => projectUser.user)
-  projectUsers: ProjectUserEntity[];
+  @OneToMany(() => ProjectUser, (projectUser) => projectUser.userId)
+  projectUsers: ProjectUser[];
 }
+
+export default User;

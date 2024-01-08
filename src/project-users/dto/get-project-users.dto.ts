@@ -1,7 +1,10 @@
-//create-project-users.dto.ts
+//get-project-users.dto.ts
 import { IsNotEmpty } from 'class-validator';
 
-export class CreateProjectUserDto {
+export class GetProjectUserDto {
+  @IsNotEmpty()
+  id: string;
+
   @IsNotEmpty()
   startDate: Date;
 

@@ -1,16 +1,36 @@
 // project-user.entity.ts
-import { Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import Project from '../../projects/entities/project.entity';
 import { User } from '../../users/entities/user.entity';
-import { ProjectEntity } from '../../projects/entities/project.entity';
 
 @Entity()
-export class ProjectUserEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id!: string;
+export class ProjectUser {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @ManyToOne(() => User, user => user.projectUsers)
+  @Column({ type: 'date' })
+  startDate: Date;
+
+  @Column({ type: 'date' })
+  endDate: Date;
+
+  @Column()
+  projectId: string;
+
+  @Column()
+  userId: string;
+
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => ProjectEntity, project => project.projectUsers)
-  project: ProjectEntity;
+  @ManyToOne(() => Project, (project) => project.id)
+  @JoinColumn({ name: 'projectId' })
+  project: Project;
 }

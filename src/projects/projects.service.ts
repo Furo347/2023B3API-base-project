@@ -1,27 +1,55 @@
 //projects.service.ts
 import { Injectable } from '@nestjs/common';
+import { FindManyOptions, Repository } from 'typeorm';
 import { CreateProjectDto } from './dto/create-project.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Project } from './entities/project.entity';
+import { JwtService } from '@nestjs/jwt';
 import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Injectable()
 export class ProjectsService {
-  create(createProjectDto: CreateProjectDto) {
-    return 'This action adds a new project';
+  constructor(
+    @InjectRepository(Project)
+    private projectsRepository: Repository<Project>,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async create(createProjectDto: CreateProjectDto) {
+    const newProject = this.projectsRepository.create(createProjectDto);
+    const insertedProject = await this.projectsRepository.save(newProject);
+    return { insertedProject };
   }
 
-  findAll() {
-    return `This action returns all projects`;
+  async getProject(name: string) {
+    const project: UpdateProjectDto = await this.projectsRepository.findOne({
+      where: { name: name },
+    });
+    return { project };
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} project`;
+  async findAll() {
+    const projects = await this.projectsRepository.find({
+      relations: {
+        referringEmployee: true
+      },
+      
+    })
+  
+    return projects;
   }
-
-  update(id: number, updateProjectDto: UpdateProjectDto) {
-    return `This action updates a #${id} project`;
+  async findByEmployee(id: string) {
+    const options: FindManyOptions<Project> = {
+      where: { referringEmployeeId: id },
+      relations: ['user', 'project_user'],
+    };
+    const project = await this.projectsRepository.findOne(options);
+    delete project.referringEmployee.password;
+    return { project };
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} project`;
+  async findById(id: string) {
+    const project = await this.projectsRepository.findOne({
+      where: { id: id },
+    });
+    return project;
   }
 }

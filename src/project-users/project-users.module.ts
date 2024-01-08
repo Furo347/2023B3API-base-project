@@ -1,13 +1,26 @@
 // project-users.module.ts
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm'; // Ajoute cette ligne
-import { ProjectUsersService } from './project-users.service';
+import { Module, forwardRef } from '@nestjs/common';
+import { ProjectsUsersService } from './project-users.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectUsersController } from './project-users.controller';
-import { ProjectUserEntity } from './entities/project-users.entity'; // Assure-toi que le chemin est correct
+import { ProjectUser } from './entities/project-users.entity';
+import {ProjectsModule} from '../projects/projects.module';
+import { UsersModule } from '../users/users.module';
+ 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ProjectUserEntity])], // Ajoute cette ligne avec l'entité ProjectUserEntity
-  controllers: [ProjectUsersController],
-  providers: [ProjectUsersService],
+  imports: [
+    TypeOrmModule.forFeature([ProjectUser]),
+    forwardRef(() => ProjectsModule),
+    forwardRef(() => UsersModule), 
+  ],
+  controllers: [
+    ProjectUsersController,
+
+  ],
+  providers: [
+    ProjectsUsersService,
+  ], 
+  exports: [ProjectsUsersService],
 })
-export class ProjectUsersModule {}
+export class ProjectsUsersModule {}

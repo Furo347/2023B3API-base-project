@@ -1,16 +1,19 @@
 //users.module.ts
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { Module, forwardRef } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
-import { User } from './entities/user.entity';
-import { AuthModule } from './auth/auth.module';
-import { JwtService } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import User from './entities/user.entity';
+import { EventsModule } from '../events/events.module';
+
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    forwardRef(() => EventsModule),
+  ],
   controllers: [UsersController],
-  providers: [UsersService, JwtService],
-  exports: [UsersService]
+  providers: [UsersService],
+  exports: [UsersService],
 })
 export class UsersModule {}

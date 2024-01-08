@@ -1,16 +1,31 @@
 // project.entity.ts
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { ProjectUserEntity } from '../../project-users/entities/project-users.entity';
-
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  ManyToMany,
+} from 'typeorm';
+import { ProjectUser } from '../../project-users/entities/project-users.entity';
+import User from '../../users/entities/user.entity';
 @Entity()
-export class ProjectEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Project {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  projectName: string;
+  name: string;
 
-  @OneToMany(() => ProjectUserEntity, projectUser => projectUser.project)
-  projectUsers: ProjectUserEntity[];
+  @Column()
+  referringEmployeeId: string;
 
+  @ManyToOne(() => User, (user) => user.id)
+  @JoinColumn({ name: 'referringEmployeeId' })
+  referringEmployee: User;
+
+  @ManyToMany(() => ProjectUser, (projectUser) => projectUser.projectId)
+  projectUsers: ProjectUser[];
 }
+
+export default Project;

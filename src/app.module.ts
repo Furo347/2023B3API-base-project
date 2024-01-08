@@ -1,16 +1,20 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import { User } from './users/entities/user.entity';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from './users/auth/auth.guard';
-import { JwtModule } from '@nestjs/jwt';
-import { AuthModule } from './users/auth/auth.module';
+import { ProjectsUsersModule } from './project-users/project-users.module';
+import { EventsModule } from './events/events.module';
 import { ProjectsModule } from './projects/projects.module';
-import {ProjectUsersModule} from './project-users/project-users.module';
-import { ProjectEntity } from './projects/entities/project.entity';
-import { ProjectUserEntity } from './project-users/entities/project-users.entity';
+import User from './users/entities/user.entity';
+import Project from './projects/entities/project.entity';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './auth/jwtStrat';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtConstants } from './auth/constant';
+import { ProjectUser } from './project-users/entities/project-users.entity';
+import { Event } from './events/entities/events.entity';
+import { RequestLoggerMiddleware } from './auth/logMiddleware';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -24,22 +28,22 @@ import { ProjectUserEntity } from './project-users/entities/project-users.entity
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, ProjectEntity, ProjectUserEntity],
+        entities: [User, Project, ProjectUser, Event],
         synchronize: true,
       }),
       inject: [ConfigService],
     }),
-    UsersModule,
     AuthModule,
+    UsersModule,
     ProjectsModule,
-    ProjectUsersModule
+    ProjectsUsersModule,
+    EventsModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-  ],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}
