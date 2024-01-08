@@ -1,4 +1,5 @@
 //events.controller.ts
+
 import {
     Controller,
     Post,
@@ -23,7 +24,6 @@ import {
       private readonly eventService: EventsService,
       private readonly projectUserService: ProjectsUsersService,
     ) {}
-  //Créer un Nouvel Event
     @Post()
     @UseGuards(AuthGuard)
     @UsePipes(new ValidationPipe())
@@ -31,19 +31,16 @@ import {
       const userId = req.user.sub;
       return this.eventService.createEvent(userId, createEventDto);
     }
-    //Récupère un event en fonction d'un ID
     @Get(':id')
     @UseGuards(AuthGuard)
     getEvent(@Param('id') event: string) {
       return this.eventService.getEvent(event);
     }
-    //retoure la liste de tout les events
     @Get()
     @UseGuards(AuthGuard)
     getAll() {
       return this.eventService.getAll();
     }
-    //accepter un event
     @UseGuards(AuthGuard)
     @Post('/:id/validate')
     async validateEvent(@Param('id') eventId: string, @Req() req) {
@@ -57,7 +54,7 @@ import {
           event.eventStatus === 'Declined'
         ) {
           throw new ForbiddenException(
-            'ne peut pas modifier le statut dun événement validé ou refusé',
+            'Ne peut pas modifier le statut d\'un événement validé ou refusé',
           );
         }
   
@@ -80,10 +77,9 @@ import {
           return update;
         }
       } catch (error) {
-        throw new UnauthorizedException('Evenement pas trouvé');
+        throw new UnauthorizedException('Evenement non trouvé');
       }
     }
-    //refuser un event
     @UseGuards(AuthGuard)
     @Post('/:id/decline')
     async declineEvent(@Param('id') eventId: string, @Req() req) {
@@ -97,7 +93,7 @@ import {
           event.eventStatus === 'Declined'
         ) {
           throw new ForbiddenException(
-            'Impossible de modifier le statut d un événement validé ou refusé',
+            'Impossible de modifier le statut d\'un événement validé ou refusé',
           );
         }
   

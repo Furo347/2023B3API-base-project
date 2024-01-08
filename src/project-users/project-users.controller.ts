@@ -1,4 +1,5 @@
 //project-users.controller.ts
+
 import {
   Controller,
   Post,
@@ -35,7 +36,7 @@ export class ProjectUsersController {
 
     if (existingProjectUser !== null) {
       throw new ConflictException(
-        "L'utilisateur est déjà possède déjà un projet sur les dates saisie.",
+        "L'utilisateur possède déjà un projet sur les dates saisie.",
       );
     }
     const projectUser = await this.projectUserService.create(createProjectUserDto);

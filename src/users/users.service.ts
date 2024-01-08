@@ -1,4 +1,5 @@
 //users.service.ts
+
 import {
   BadRequestException,
   Injectable,
@@ -27,7 +28,7 @@ export class UsersService {
       password: await bcrypt.hash(createUser.password, saltOrRounds),
     });
     const insertedUser = await this.userRepository.save(user);
-    delete insertedUser.password; // ne renvoie pas le mdp
+    delete insertedUser.password;
     return insertedUser;
   }
 

@@ -1,4 +1,5 @@
 //events.module.ts
+
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Event } from './entities/events.entity';

@@ -1,4 +1,5 @@
 // project-users.service.ts
+
 import {
   Injectable,
   NotFoundException,
@@ -40,7 +41,6 @@ export class ProjectsUsersService {
       throw new NotFoundException("L'utilisateur ou le projet n'a pas été trouvé");
     }
   }
-
 
   private async getCompleteProjectUser(id: string): Promise<ProjectUser> {
     const options = this.buildFindOptionsWithRelations(['user', 'project', 'project.referringEmployee']);
