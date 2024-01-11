@@ -1,5 +1,4 @@
 //user.entity.ts
-
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { IsEmail, IsOptional } from 'class-validator';
 import { Exclude } from 'class-transformer';

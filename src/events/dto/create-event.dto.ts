@@ -1,5 +1,4 @@
 //create-event.dto.ts
-
 import { IsDateString, IsEnum, IsOptional, IsString } from 'class-validator';
 
 export class CreateEventDto {

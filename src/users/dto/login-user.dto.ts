@@ -1,5 +1,4 @@
 //login-user.dto.ts
-
 import { MinLength, IsEmail, IsNotEmpty } from 'class-validator';
 
 export class loginUserDto {
